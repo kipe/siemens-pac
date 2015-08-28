@@ -30,6 +30,19 @@ class Power(object):
             raise TypeError('unsupported operand type(s) for -')
         return Power(apparent=self.apparent - other.apparent, active=self.active - other.active)
 
+    def __mul__(self, t):
+        ''' Multiplies Power with timedelta or seconds, to allow easy calculation of average Energy '''
+        if not isinstance(t, timedelta) and not isinstance(t, Number):
+            raise TypeError('division allowed only by timedelta or number')
+        if isinstance(t, timedelta):
+            t = t.total_seconds()
+
+        return Energy(
+            apparent=self.apparent / 3600 * abs(t),
+            active=self.active / 3600 * abs(t),
+            reactive=self.reactive / 3600 * abs(t),
+        )
+
     @property
     def reactive(self):
         if not isnan(self._reactive):
