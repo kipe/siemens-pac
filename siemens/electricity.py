@@ -112,7 +112,7 @@ class Energy(object):
 
     def __truediv__(self, t):
         ''' Divides Energy with timedelta or seconds, to allow easy calculation of average Power. '''
-        return self.__truediv__(t)
+        return self.__div__(t)
 
     def as_dict(self, replace_nan=False):
         return {
