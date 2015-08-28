@@ -4,6 +4,10 @@ from numbers import Number
 from datetime import timedelta
 
 
+def zero_if_nan(value, replace_nan):
+    return 0 if isnan(value) and replace_nan else value
+
+
 class Power(object):
     def __init__(self, apparent=float('nan'), active=float('nan'), reactive=float('nan')):
         self.apparent = apparent
@@ -37,66 +41,19 @@ class Power(object):
         return self.active / self.apparent
 
     def as_dict(self, replace_nan=False):
-        if replace_nan:
-            return {
-                'apparent': self.apparent if not isnan(self.apparent) else 0,
-                'active': self.active if not isnan(self.active) else 0,
-                'reactive': self.reactive if not isnan(self.reactive) else 0,
-            }
-
         return {
-            'apparent': self.apparent,
-            'active': self.active,
-            'reactive': self.reactive,
-        }
-
-
-class Phase(object):
-    power = Power()
-    voltage = float('nan')
-    current = float('nan')
-
-    def __init__(self, voltage=float('nan'), current=float('nan'), apparent=float('nan'), active=float('nan')):
-        self.voltage = voltage
-        self.current = current
-        self.power = Power(apparent, active)
-
-    def __repr__(self):
-        return '<Phase: %s V, %s A, %s>' % (self.voltage, self.current, self.power.__repr__())
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __add__(self, other):
-        if not isinstance(other, Phase):
-            raise TypeError('unsupported operand type(s) for +')
-        return Phase(
-            voltage=(self.voltage + other.voltage) / 2,
-            current=self.current + other.current,
-            apparent=self.power.apparent + other.power.apparent,
-            active=self.power.active + other.power.active)
-
-    def __sub__(self, other):
-        if not isinstance(other, Phase):
-            raise TypeError('unsupported operand type(s) for -')
-        return Phase(
-            voltage=(self.voltage + other.voltage) / 2,
-            current=self.current - other.current,
-            apparent=self.power.apparent - other.power.apparent,
-            active=self.power.active - other.power.active)
-
-    def as_dict(self, replace_nan=False):
-        if replace_nan:
-            return {
-                'power': self.power.as_dict(replace_nan=True),
-                'voltage': self.voltage if not isnan(self.voltage) else 0,
-                'current': self.current if not isnan(self.current) else 0,
-            }
-
-        return {
-            'power': self.power.as_dict(replace_nan=False),
-            'voltage': self.voltage,
-            'current': self.current,
+            'apparent': {
+                'unit': 'VA',
+                'value': zero_if_nan(self.apparent, replace_nan),
+            },
+            'active': {
+                'unit': 'W',
+                'value': zero_if_nan(self.active, replace_nan),
+            },
+            'reactive': {
+                'unit': 'VAR',
+                'value': zero_if_nan(self.reactive, replace_nan),
+            },
         }
 
 
@@ -136,26 +93,29 @@ class Energy(object):
             t = t.total_seconds()
 
         return Power(
-            apparent=self.apparent / t * 3600,
-            active=self.active / t * 3600,
-            reactive=self.reactive / t * 3600,
+            apparent=self.apparent / abs(t) * 3600,
+            active=self.active / abs(t) * 3600,
+            reactive=self.reactive / abs(t) * 3600,
         )
 
     def __truediv__(self, t):
+        ''' Divides Energy with timedelta or seconds, to allow easy calculation of average power '''
         return self.__truediv__(t)
 
     def as_dict(self, replace_nan=False):
-        if replace_nan:
-            return {
-                'apparent': self.apparent if not isnan(self.apparent) else 0,
-                'active': self.active if not isnan(self.active) else 0,
-                'reactive': self.reactive if not isnan(self.reactive) else 0,
-            }
-
         return {
-            'apparent': self.apparent,
-            'active': self.active,
-            'reactive': self.reactive,
+            'apparent': {
+                'unit': 'VAh',
+                'value': zero_if_nan(self.apparent, replace_nan),
+            },
+            'active': {
+                'unit': 'Wh',
+                'value': zero_if_nan(self.active, replace_nan),
+            },
+            'reactive': {
+                'unit': 'VARh',
+                'value': zero_if_nan(self.reactive, replace_nan),
+            },
         }
 
 
@@ -192,4 +152,48 @@ class Tariff(object):
         return {
             'import': self.energy_import.as_dict(replace_nan=replace_nan),
             'export': self.energy_export.as_dict(replace_nan=replace_nan),
+        }
+
+
+class Phase(object):
+    def __init__(self, voltage=float('nan'), current=float('nan'), apparent=float('nan'), active=float('nan')):
+        self.voltage = voltage
+        self.current = current
+        self.power = Power(apparent, active)
+
+    def __repr__(self):
+        return '<Phase: %s V, %s A, %s>' % (self.voltage, self.current, self.power.__repr__())
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __add__(self, other):
+        if not isinstance(other, Phase):
+            raise TypeError('unsupported operand type(s) for +')
+        return Phase(
+            voltage=(self.voltage + other.voltage) / 2,
+            current=self.current + other.current,
+            apparent=self.power.apparent + other.power.apparent,
+            active=self.power.active + other.power.active)
+
+    def __sub__(self, other):
+        if not isinstance(other, Phase):
+            raise TypeError('unsupported operand type(s) for -')
+        return Phase(
+            voltage=(self.voltage + other.voltage) / 2,
+            current=self.current - other.current,
+            apparent=self.power.apparent - other.power.apparent,
+            active=self.power.active - other.power.active)
+
+    def as_dict(self, replace_nan=False):
+        return {
+            'power': self.power.as_dict(replace_nan=replace_nan),
+            'voltage': {
+                'unit': 'V',
+                'value': zero_if_nan(self.voltage, replace_nan),
+            },
+            'current': {
+                'unit': 'A',
+                'value': zero_if_nan(self.current, replace_nan),
+            },
         }

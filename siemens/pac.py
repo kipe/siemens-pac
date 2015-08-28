@@ -1,21 +1,22 @@
 from __future__ import unicode_literals, print_function, division
-from math import isnan
 from struct import pack, unpack
 from modbus_tk.defines import READ_INPUT_REGISTERS, WRITE_MULTIPLE_REGISTERS
 
-from siemens.electricity import Power, Phase, Energy, Tariff
+from siemens.electricity import Power, Phase, Energy, Tariff, zero_if_nan
 
 
 class PAC(object):
     _master = None
     _unit = None
-    power = Power()
-    L1 = Phase()
-    L2 = Phase()
-    L3 = Phase()
-    tariff_1 = Tariff()
-    tariff_2 = Tariff()
-    frequency = 0
+
+    def __init__(self):
+        self.power = Power()
+        self.L1 = Phase()
+        self.L2 = Phase()
+        self.L3 = Phase()
+        self.tariff_1 = Tariff()
+        self.tariff_2 = Tariff()
+        self.frequency = float('nan')
 
     def _from_float(self, values):
         return [unpack(str('>f'), pack(str('>HH'), *values[i:i + 2]))[0] for i in range(0, len(values), 2)]
@@ -41,7 +42,7 @@ class PAC(object):
         values = self._from_float(self.read_input_register(1, 30))
 
         # Note: PAC reports phase powers as NaN, if all phases aren't connected.
-        #       However, the total power read with PAC.read_power() is valid even then.
+        #       However, the total power read with PAC.read_power() is seems valid even then.
         self.L1 = Phase(values[0], values[6], values[9], values[12])
         self.L2 = Phase(values[1], values[7], values[10], values[13])
         self.L3 = Phase(values[2], values[8], values[11], values[14])
@@ -80,6 +81,14 @@ class PAC(object):
         # Read energy to update values...
         self.read_energy()
 
+    @property
+    def energy(self):
+        return self.tariff_1 + self.tariff_2
+
+    @property
+    def energy_balance(self):
+        return self.tariff_1.energy_import + self.tariff_2.energy_import - self.tariff_1.energy_export - self.tariff_2.energy_export
+
     def as_dict(self, replace_nan=False):
         return {
             'power': self.power.as_dict(replace_nan=replace_nan),
@@ -89,16 +98,13 @@ class PAC(object):
                 'L3': self.L3.as_dict(replace_nan=replace_nan),
             },
             'energy': self.energy.as_dict(replace_nan=replace_nan),
+            'balance': self.energy_balance.as_dict(replace_nan=replace_nan),
             'tariffs': [
                 self.tariff_1.as_dict(replace_nan=replace_nan),
                 self.tariff_2.as_dict(replace_nan=replace_nan),
             ],
-            'frequency': 0 if isnan(self.frequency) and replace_nan else self.frequency,
+            'frequency': zero_if_nan(self.frequency, replace_nan),
         }
-
-    @property
-    def energy(self):
-        return self.tariff_1 + self.tariff_2
 
 
 class PAC3100(PAC):
