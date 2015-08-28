@@ -172,7 +172,13 @@ class Phase(object):
     def __init__(self, voltage=float('nan'), current=float('nan'), apparent=float('nan'), active=float('nan')):
         self.voltage = voltage
         self.current = current
-        self.power = Power(apparent, active)
+
+        # If both apparent and active powers are NaN, calculate Power according to voltage and current
+        # Not really exact, but at least gives apparent power...
+        if isnan(apparent) and isnan(active):
+            self.power = Power(self.voltage * current, float('nan'))
+        else:
+            self.power = Power(apparent, active)
 
     def __repr__(self):
         return '<Phase: %s V, %s A, %s>' % (self.voltage, self.current, self.power.__repr__())

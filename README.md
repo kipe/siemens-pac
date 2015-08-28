@@ -19,4 +19,7 @@ print(p.as_dict(replace_nan=True))
 
 ## Issues
 - PAC3100 is supported only in theory, as I haven't got a device to test on. Might or might not work.
-- According to tests done on PAC3200, if only one (might be also only two?) phase is connected, phase specific powers are reported as NaN. However, total power, accessible via `PACx200.power`, is reported correctly.
+- According to tests done on PAC3200, if only one (might be also only two?) phase is connected, phase specific powers are reported as NaN.
+.. However, total power, accessible via `PACx200.power`, is reported correctly.
+.. In this case, Phase.voltage and Phase.current are used to calculate Power.apparent.
+.. Power.active and Power.reactive are left as NaN, to indicate invalid input.
