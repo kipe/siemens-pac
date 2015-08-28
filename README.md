@@ -9,7 +9,7 @@ pip install git+https://github.com/kipe/siemens-pac.git
 
 ## Usage
 To read PACx200 -devices through Modbus TCP/IP:
-```
+```python
 from siemens.pac import PACx200
 p = PACx200('192.168.0.80')
 p.read()  # Reads all values from PAC
