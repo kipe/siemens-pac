@@ -31,7 +31,7 @@ class Power(object):
         return Power(apparent=self.apparent - other.apparent, active=self.active - other.active)
 
     def __mul__(self, t):
-        ''' Multiplies Power with timedelta or seconds, to allow easy calculation of average Energy '''
+        ''' Multiplies Power with timedelta or seconds, to allow easy calculation of average Energy. '''
         if not isinstance(t, timedelta) and not isinstance(t, Number):
             raise TypeError('division allowed only by timedelta or number')
         if isinstance(t, timedelta):
@@ -99,7 +99,7 @@ class Energy(object):
             reactive=self.reactive - other.reactive)
 
     def __div__(self, t):
-        ''' Divides Energy with timedelta or seconds, to allow easy calculation of average power '''
+        ''' Divides Energy with timedelta or seconds, to allow easy calculation of average Power. '''
         if not isinstance(t, timedelta) and not isinstance(t, Number):
             raise TypeError('division allowed only by timedelta or number')
         if isinstance(t, timedelta):
@@ -112,7 +112,7 @@ class Energy(object):
         )
 
     def __truediv__(self, t):
-        ''' Divides Energy with timedelta or seconds, to allow easy calculation of average power '''
+        ''' Divides Energy with timedelta or seconds, to allow easy calculation of average Power. '''
         return self.__truediv__(t)
 
     def as_dict(self, replace_nan=False):
