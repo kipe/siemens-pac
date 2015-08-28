@@ -1,0 +1,10 @@
+bin
+include
+lib
+local
+
+*.pyc
+pip-selfcheck.json
+lib-python
+lib_pypy
+site-packages
