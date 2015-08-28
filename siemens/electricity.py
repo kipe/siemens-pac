@@ -40,7 +40,6 @@ class Power(object):
         return Energy(
             apparent=self.apparent / 3600 * abs(t),
             active=self.active / 3600 * abs(t),
-            reactive=self.reactive / 3600 * abs(t),
         )
 
     @property
