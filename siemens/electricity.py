@@ -157,6 +157,19 @@ class Tariff(object):
             energy_import=self.energy_import - other.energy_import,
             energy_export=self.energy_export - other.energy_export)
 
+    def __div__(self, t):
+        ''' Divides Tariff with timedelta or seconds, to allow easy calculation of average import and export Powers. '''
+        if not isinstance(t, timedelta) and not isinstance(t, Number):
+            raise TypeError('division allowed only by timedelta or number')
+        if isinstance(t, timedelta):
+            t = t.total_seconds()
+
+        return [self.energy_import / t, self.energy_export / t]
+
+    def __truediv__(self, t):
+        ''' Divides Energy with timedelta or seconds, to allow easy calculation of average Power. '''
+        return self.__div__(t)
+
     @property
     def balance(self):
         return self.energy_import - self.energy_export
