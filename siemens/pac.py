@@ -136,9 +136,9 @@ class PACx200(PAC):
         super(PACx200, self).__init__()
 
 
-class PAC3200(PAC):
+class PAC3200(PACx200):
     pass
 
 
-class PAC4200(PAC):
+class PAC4200(PACx200):
     pass
