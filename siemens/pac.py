@@ -80,6 +80,11 @@ class PAC(object):
             self._master.execute(self._unit, WRITE_MULTIPLE_REGISTERS, x, output_value=[0, 0, 0, 0])
         # Read energy to update values...
         self.read_energy()
+        
+    def close(self):
+        if self._master is None or self._unit is None:
+            return
+        self._master.close()
 
     @property
     def energy(self):
