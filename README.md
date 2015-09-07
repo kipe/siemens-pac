@@ -1,5 +1,5 @@
 # Siemens SENTRON PAC
-[![Build Status](https://travis-ci.org/kipe/pycron.svg?branch=master)](https://travis-ci.org/kipe/pycron)
+[![Build Status](https://travis-ci.org/kipe/siemens-pac.svg?branch=master)](https://travis-ci.org/kipe/siemens-pac)
 
 A Python library for reading [Siemens SENTRON PAC -series](http://w3.siemens.com/powerdistribution/global/en/lv/product-portfolio/sentron/measuring-devices-energy-monitoring/measuring-devices/7kt-pac3200-measuring-devices/pages/7km-pac3200-measuring-devices.aspx) measuring devices.
 
